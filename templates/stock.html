@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../../../favicon.ico">
+
+    <title>{{ stock.name }}</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css"
+          integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
+    {% load static %}
+    <script src="{% static 'js/echarts.min.js' %}"></script>
+    <!-- Custom styles for this template -->
+</head>
+
+<body style="background-color: #212529">
+
+{% include 'components/nav.html' %}
+{% include 'components/stock-header.html' %}
+<main role="main" class="container">
+
+    <div class="container" style="margin-top: 125px">
+        <div>
+            <h3 style="color: white">基本信息</h3>
+        </div>
+        <div>
+            <br>
+            <img src="/media/{{ stock.icon }}" class="img-thumbnail" style="width: 100px">
+        </div>
+        <div class="row" style="margin-top: 20px">
+
+            <table class="table table-dark">
+                <tbody>
+                <tr>
+                    <td>名称</td>
+                    <td>{{ stock.name }}</td>
+                </tr>
+                <tr>
+                    <td>代码</td>
+                    <td>{{ stock.code }}</td>
+                </tr>
+                <tr>
+                    <td>发行数量</td>
+                    <td>{{ stock.circulation }}</td>
+                </tr>
+                <tr>
+                    <td>发行价</td>
+                    <td>{{ stock.start_price }}</td>
+                </tr>
+                <tr>
+                    <td>发行日</td>
+                    <td>{{ stock.create | date:"Y/m/d" }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="row">
+            <h3 style="color: white">五日记录</h3>
+            <table class="table table-dark">
+                <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>开盘价</th>
+                    <th>收盘价</th>
+                    <th>当日最高</th>
+                    <th>当日最低</th>
+                    <th>涨幅</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for daily in last_five %}
+                    <tr>
+                        <td>{{ daily.time | date:"Y/m/d" }}</td>
+                        <td>{{ daily.open_price }}</td>
+                        <td>{{ daily.close_price }}</td>
+                        <td>{{ daily.max_price }}</td>
+                        <td>{{ daily.min_price }}</td>
+                        <td>{{ daily.rate }}%</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="row">
+            <div id="daily_chart" style="width: 100%;height:400px;"></div>
+
+        </div>
+    </div>
+
+</main><!-- /.container -->
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js"
+        integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em"
+        crossorigin="anonymous"></script>
+{#<script type="text/javascript">#}
+{##}
+{#    // 基于准备好的dom，初始化echarts实例#}
+{#    let stockId = window.location.pathname.split('/')[2];#}
+{#    fetch(`/api/stock/${stockId}`)#}
+{#        .then(json => json.json())#}
+{#        .then(data => createDailyChart(data))#}
+{#        .catch(reason => console.log(reason));#}
+{##}
+{#    let createDailyChart = (dailyData) => {#}
+{#        const myChart = echarts.init(document.getElementById('daily_chart'));#}
+{##}
+{#        // 指定图表的配置项和数据#}
+{#        const option = {#}
+{#            tooltip: {},#}
+{#            xAxis: {#}
+{#                data: dailyData.results.map(data => data.time)#}
+{#            },#}
+{#            yAxis: {#}
+{##}
+{#            },#}
+{#            series: [{#}
+{#                name: '价格',#}
+{#                type: 'line',#}
+{#                sampling: 'average',#}
+{#                itemStyle: {#}
+{#                    normal: {#}
+{#                        color: 'rgb(255, 70, 131)'#}
+{#                    }#}
+{#                },#}
+{#                areaStyle: {#}
+{#                    normal: {#}
+{#                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{#}
+{#                            offset: 0,#}
+{#                            color: 'rgb(255, 158, 68)'#}
+{#                        }, {#}
+{#                            offset: 1,#}
+{#                            color: 'rgb(255, 70, 131)'#}
+{#                        }])#}
+{#                    }#}
+{#                },#}
+{##}
+{#                data: dailyData.results.map(data => data.close_price)#}
+{#            }]#}
+{#        };#}
+{#        myChart.setOption(option);#}
+{#    };#}
+{##}
+{##}
+{#    // 使用刚指定的配置项和数据显示图表。#}
+{##}
+{#</script>#}
+</body>
+</html>

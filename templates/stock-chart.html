@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../../../favicon.ico">
+
+    <title>{{ stock.name }}</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css"
+          integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
+    {% load static %}
+    <script src="{% static 'js/echarts.min.js' %}"></script>
+    <!-- Custom styles for this template -->
+    <style>
+        table.table-bordered > thead > tr > th {
+            border: 1px solid white;
+        }
+
+        table.table-bordered > tbody > tr > td {
+            border: 1px solid white;
+        }
+    </style>
+</head>
+
+<body style="background-color: #212529">
+
+{% include 'components/nav.html' %}
+{% include 'components/stock-header.html' %}
+<main role="main" class="container">
+
+    <div class="container" style="margin-top: 120px">
+
+        <div class="row">
+            <h3 style="color: white">{{ stock.name }}({{ stock.code }})</h3>
+        </div>
+
+        <div class="row" style="margin-top: 50px">
+            <h4 style="color: white">实时</h4>
+            <table class="table table-dark table-bordered" style="width: 100%">
+                <tbody>
+                <tr>
+                    <td scope="row">当前价格</td>
+                    <td>均价</td>
+                    <td>涨幅</td>
+                    <td>当日最高</td>
+                    <td>当日最低</td>
+                </tr>
+                <tr>
+                    <td>{{ now_price | floatformat:'2' }}</td>
+                    <td>{{ avg_price | floatformat:'2' }}</td>
+                    <td>{{ today_rate | floatformat:'2' }}%</td>
+                    <td>{{ today_max | floatformat:'2' }}</td>
+                    <td>{{ today_min | floatformat:'2' }}</td>
+                </tr>
+                <tr>
+                    <td colspan="3">今开</td>
+                    <td colspan="2">昨收</td>
+                </tr>
+                <tr>
+                    <td colspan="3">{{ today_open | floatformat:'2' }}</td>
+                    <td colspan="2">{{ yesterday_close | floatformat:'2' }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="row" style="margin-top: 50px">
+            <h4 style="color: white">每日</h4>
+            <div id="daily_chart" style="width: 100%;height:400px;margin-top: 50px"></div>
+
+        </div>
+
+        <div class="row" style="margin-top: 50px">
+            <h4 style="color: white">分时</h4>
+            <div id="hourly_chart" style="width: 100%;height:400px;"></div>
+        </div>
+    </div>
+
+</main><!-- /.container -->
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js"
+        integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em"
+        crossorigin="anonymous"></script>
+<script type="text/javascript">
+
+    // 基于准备好的dom，初始化echarts实例
+    let stockId = window.location.pathname.split('/')[2];
+    fetch(`/api/stock/${stockId}?page_size=100`)
+        .then(json => json.json())
+        .then(data => createDailyChart(data))
+        .catch(reason => console.log(reason));
+
+    let createDailyChart = (dailyData) => {
+        const myChart = echarts.init(document.getElementById('daily_chart'));
+
+
+        let chartData = dailyData.results.map(
+            data => [data.time, data.open_price.toFixed(2), data.close_price.toFixed(2), data.min_price.toFixed(2), data.max_price.toFixed(2)]
+        );
+
+
+        function calculateMA(dayCount, data) {
+            const result = [];
+            let i = 0, len = data.length;
+            for (; i < len; i++) {
+                if (i < dayCount) {
+                    result.push('-');
+                    continue;
+                }
+                let sum = 0;
+                for (let j = 0; j < dayCount; j++) {
+                    sum += data[i - j][1];
+                }
+                result.push((sum / dayCount).toFixed(2));
+            }
+            return result;
+        }
+
+
+        var dates = chartData.map(function (item) {
+            return item[0];
+        });
+
+        var data = chartData.map(function (item) {
+            return [+item[1], +item[2], +item[3], +item[4]];
+        });
+        var option = {
+            backgroundColor: '#212529',
+            legend: {
+                data: ['日K', 'MA5', 'MA10', 'MA20', 'MA30'],
+                inactiveColor: '#777',
+                textStyle: {
+                    color: '#fff'
+                }
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    animation: false,
+                    type: 'cross',
+                    lineStyle: {
+                        color: '#376df4',
+                        width: 2,
+                        opacity: 1
+                    }
+                }
+            },
+            xAxis: {
+                type: 'category',
+                data: dates,
+                axisLine: {lineStyle: {color: '#FFFFFF'}}
+            },
+            yAxis: {
+                scale: true,
+                axisLine: {lineStyle: {color: '#FFFFFF'}},
+                splitLine: {show: false}
+            },
+            grid: {
+                bottom: 80
+            },
+            dataZoom: [{
+                textStyle: {
+                    color: '#8392A5'
+                },
+                handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                handleSize: '80%',
+                dataBackground: {
+                    areaStyle: {
+                        color: '#8392A5'
+                    },
+                    lineStyle: {
+                        opacity: 0.8,
+                        color: '#8392A5'
+                    }
+                },
+                handleStyle: {
+                    color: '#fff',
+                    shadowBlur: 3,
+                    shadowColor: 'rgba(0, 0, 0, 0.6)',
+                    shadowOffsetX: 2,
+                    shadowOffsetY: 2
+                }
+            }, {
+                type: 'inside'
+            }],
+            animation: false,
+            series: [
+                {
+                    type: 'candlestick',
+                    name: '日K',
+                    data: data,
+                    itemStyle: {
+                        normal: {
+                            color: '#FD1050',
+                            color0: '#0CF49B',
+                            borderColor: '#FD1050',
+                            borderColor0: '#0CF49B'
+                        }
+                    }
+                },
+                {
+                    name: 'MA5',
+                    type: 'line',
+                    data: calculateMA(5, data),
+                    smooth: true,
+                    showSymbol: false,
+                    lineStyle: {
+                        normal: {
+                            width: 1
+                        }
+                    }
+                },
+                {
+                    name: 'MA10',
+                    type: 'line',
+                    data: calculateMA(10, data),
+                    smooth: true,
+                    showSymbol: false,
+                    lineStyle: {
+                        normal: {
+                            width: 1
+                        }
+                    }
+                },
+                {
+                    name: 'MA20',
+                    type: 'line',
+                    data: calculateMA(20, data),
+                    smooth: true,
+                    showSymbol: false,
+                    lineStyle: {
+                        normal: {
+                            width: 1
+                        }
+                    }
+                },
+                {
+                    name: 'MA30',
+                    type: 'line',
+                    data: calculateMA(30, data),
+                    smooth: true,
+                    showSymbol: false,
+                    lineStyle: {
+                        normal: {
+                            width: 1
+                        }
+                    }
+                }
+            ]
+        };
+        myChart.setOption(option);
+    };
+
+
+    // 使用刚指定的配置项和数据显示图表。
+
+</script>
+<script type="text/javascript">
+    const hourlyChart = echarts.init(document.getElementById('hourly_chart'));
+    // 基于准备好的dom，初始化echarts实例
+    {#let stockId = window.location.pathname.split('/')[2];#}
+    fetch(`/api/stock/${stockId}/hourly?page_size=100`)
+        .then(json => json.json())
+        .then(data => createHourlyChart(data))
+        .catch(reason => console.log(reason));
+
+    let createHourlyChart = (dailyData) => {
+        const myChart = echarts.init(document.getElementById('daily_chart'));
+
+        // 指定图表的配置项和数据
+        const option = {
+            tooltip: {},
+            xAxis: {
+                data: dailyData.results.map(data => data.time),
+                axisLine: {lineStyle: {color: '#FFFFFF'}},
+
+            },
+            yAxis: {
+                axisLine: {lineStyle: {color: '#FFFFFF'}},
+
+            },
+            series: [{
+                name: '价格',
+                type: 'line',
+                sampling: 'average',
+                itemStyle: {
+                    normal: {
+                        color: 'rgb(255, 70, 131)'
+                    },
+
+                },
+                areaStyle: {
+                    normal: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                            offset: 0,
+                            color: 'rgb(255, 158, 68)'
+                        }, {
+                            offset: 1,
+                            color: 'rgb(255, 70, 131)'
+                        }])
+                    }
+                },
+
+                data: dailyData.results.map(data => data.price.toFixed(2))
+            }],
+            dataZoom: [{
+                textStyle: {
+                    color: '#8392A5'
+                },
+                handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                handleSize: '80%',
+                dataBackground: {
+                    areaStyle: {
+                        color: '#8392A5'
+                    },
+                    lineStyle: {
+                        opacity: 0.8,
+                        color: '#8392A5'
+                    }
+                },
+                handleStyle: {
+                    color: '#fff',
+                    shadowBlur: 3,
+                    shadowColor: 'rgba(0, 0, 0, 0.6)',
+                    shadowOffsetX: 2,
+                    shadowOffsetY: 2
+                }
+            }, {
+                type: 'inside'
+            }],
+        };
+        hourlyChart.setOption(option);
+    };
+
+
+    // 使用刚指定的配置项和数据显示图表。
+
+</script>
+</body>
+</html>
