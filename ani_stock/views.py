@@ -2,11 +2,14 @@ import _thread
 import datetime
 
 import schedule
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.models import User
 from django.db.models import Max, Min, Avg
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 # Create your views here.
 from django.views import View
 
+from ani_stock.forms import RegisterForm, LoginForm
 from ani_stock.models import Stock, StockDaily, StockHourly
 from ani_stock.tasks import update_stock, update_open_daily_stock, close_stock
 
@@ -89,11 +92,31 @@ class LoginView(View):
 
         })
 
+    def post(self, request, *args, **kwargs):
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            user: User = authenticate(request, username=form.data['username'], password=form.data['password'])
+            if user is not None:
+                login(request, user)
+                if not form.data['remember']:
+                    request.session.set_expiry(0)
+                return redirect('/')
+            else:
+                render(request, 'error.html', {'message': "无法登陆，请检查用户名和密码"})
+
+
 class RegisterView(View):
     def get(self, request, *args, **kwargs):
-        return render(request, 'register.html', {
+        return render(request, 'register.html')
 
-        })
+    def post(self, request, *args, **kwargs):
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            if User.objects.filter(username=form.data['username']).exists():
+                return render(request, 'error.html', {'message': '用户已存在'})
+            User.objects.create_user(username=form.data['username'], email=form.data['username'],
+                                     password=form.data['password'])
+        return render(request, 'register.html')
 
 
 def start_update_stock_task():

@@ -124,31 +124,15 @@
 </head>
 
 <body>
-<form class="form-signin" method="post" action="/login">
+<form class="form-signin">
     {% csrf_token %}
     <div class="text-center mb-4">
         <img class="mb-4" src="{% static 'img/logo.svg' %}" alt="" width="72" height="72">
         <h1 class="h3 mb-3 font-weight-normal">Ani Stock</h1>
-        <p>假如ACG加上财经会怎样？（笑）</p>
+        <p>发生了错误！！</p>
     </div>
 
-    <div class="form-label-group">
-        <input type="email" id="inputEmail" class="form-control" placeholder="邮箱" name="username" required autofocus>
-        <label for="inputEmail">邮箱地址</label>
-    </div>
-
-    <div class="form-label-group">
-        <input type="password" id="inputPassword" class="form-control" placeholder="密码" name="password" required>
-        <label for="inputPassword">密码</label>
-    </div>
-
-    <div class="checkbox mb-3">
-        <label>
-            <input type="checkbox" value="remember-me" name="remember"> 记住我
-        </label>
-    </div>
-    <button class="btn btn-lg btn-primary btn-block" type="submit">登陆</button>
-    <a href="/register">注册账户</a>
+    <p>{{ message }}</p>
     <p class="mt-5 mb-3 text-muted text-center">&copy; Ani Stock 2018</p>
 </form>
 </body>
