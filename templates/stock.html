@@ -92,7 +92,7 @@
     </div>
 
 </main><!-- /.container -->
-
+{% include 'components/footer.html' %}
 <!-- Bootstrap core JavaScript
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
@@ -106,57 +106,5 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js"
         integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em"
         crossorigin="anonymous"></script>
-{#<script type="text/javascript">#}
-{##}
-{#    // 基于准备好的dom，初始化echarts实例#}
-{#    let stockId = window.location.pathname.split('/')[2];#}
-{#    fetch(`/api/stock/${stockId}`)#}
-{#        .then(json => json.json())#}
-{#        .then(data => createDailyChart(data))#}
-{#        .catch(reason => console.log(reason));#}
-{##}
-{#    let createDailyChart = (dailyData) => {#}
-{#        const myChart = echarts.init(document.getElementById('daily_chart'));#}
-{##}
-{#        // 指定图表的配置项和数据#}
-{#        const option = {#}
-{#            tooltip: {},#}
-{#            xAxis: {#}
-{#                data: dailyData.results.map(data => data.time)#}
-{#            },#}
-{#            yAxis: {#}
-{##}
-{#            },#}
-{#            series: [{#}
-{#                name: '价格',#}
-{#                type: 'line',#}
-{#                sampling: 'average',#}
-{#                itemStyle: {#}
-{#                    normal: {#}
-{#                        color: 'rgb(255, 70, 131)'#}
-{#                    }#}
-{#                },#}
-{#                areaStyle: {#}
-{#                    normal: {#}
-{#                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{#}
-{#                            offset: 0,#}
-{#                            color: 'rgb(255, 158, 68)'#}
-{#                        }, {#}
-{#                            offset: 1,#}
-{#                            color: 'rgb(255, 70, 131)'#}
-{#                        }])#}
-{#                    }#}
-{#                },#}
-{##}
-{#                data: dailyData.results.map(data => data.close_price)#}
-{#            }]#}
-{#        };#}
-{#        myChart.setOption(option);#}
-{#    };#}
-{##}
-{##}
-{#    // 使用刚指定的配置项和数据显示图表。#}
-{##}
-{#</script>#}
 </body>
 </html>

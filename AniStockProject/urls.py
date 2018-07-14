@@ -19,11 +19,13 @@ from django.urls import path
 
 from AniStockProject import settings
 from ani_stock.api.view import StockDailyAPIView, StockHourlyAPIView
-from ani_stock.views import StockView, StockChartView, IndexView
+from ani_stock.views import StockView, StockChartView, IndexView, LoginView, RegisterView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', IndexView.as_view()),
+    path('login', LoginView.as_view()),
+    path('register', RegisterView.as_view()),
     path('stock/<int:stock_id>/', StockView.as_view(), name='stock'),
     path('stock/<int:stock_id>/chart', StockChartView.as_view(), name='stock_chart'),
     path('api/stock/<int:stock_id>/', StockDailyAPIView.as_view(), name='stock'),

@@ -39,7 +39,7 @@
         </div>
 
         <div class="row" style="margin-top: 50px">
-            <h4 style="color: white">实时</h4>
+            <h4 style="color: white">实时({{ now | date:"Y/m/d" }})</h4>
             <table class="table table-dark table-bordered" style="width: 100%">
                 <tbody>
                 <tr>
@@ -50,18 +50,57 @@
                     <td>当日最低</td>
                 </tr>
                 <tr>
-                    <td>{{ now_price | floatformat:'2' }}</td>
-                    <td>{{ avg_price | floatformat:'2' }}</td>
-                    <td>{{ today_rate | floatformat:'2' }}%</td>
-                    <td>{{ today_max | floatformat:'2' }}</td>
-                    <td>{{ today_min | floatformat:'2' }}</td>
+                    <td>
+                        {% if now_price %}
+                            {{ now_price | floatformat:'2' }}
+                        {% else %}
+                            无数据
+                        {% endif %}
+
+                    </td>
+                    <td>
+                        {% if avg_price %}
+                            {{ avg_price | floatformat:'2' }}
+                        {% else %}
+                            无数据
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if today_rate %}
+                            {{ today_rate | floatformat:'2' }}%
+                        {% else %}
+                            无数据
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if today_max %}
+                            {{ today_max | floatformat:'2' }}
+                        {% else %}
+                            无数据
+                        {% endif %}
+
+                    </td>
+                    <td>
+                        {% if today_min %}
+                            {{ today_min | floatformat:'2' }}
+                        {% else %}
+                            无数据
+                        {% endif %}
+
+                    </td>
                 </tr>
                 <tr>
                     <td colspan="3">今开</td>
                     <td colspan="2">昨收</td>
                 </tr>
                 <tr>
-                    <td colspan="3">{{ today_open | floatformat:'2' }}</td>
+                    <td colspan="3">
+                        {% if today_open %}
+                            {{ today_open | floatformat:'2' }}
+                        {% else %}
+                            无数据
+                        {% endif %}
+                    </td>
                     <td colspan="2">{{ yesterday_close | floatformat:'2' }}</td>
                 </tr>
                 </tbody>
@@ -80,7 +119,7 @@
     </div>
 
 </main><!-- /.container -->
-
+{% include 'components/footer.html' %}
 <!-- Bootstrap core JavaScript
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->

@@ -39,7 +39,8 @@ class StockChartView(View):
         stock = Stock.objects.get(pk=kwargs['stock_id'])
         template_var = {
             'stock': stock,
-            'index': 'now'
+            'index': 'now',
+            'now': datetime.datetime.now()
         }
         now = datetime.datetime.now()
         # get today
@@ -79,6 +80,19 @@ class IndexView(View):
         stocks = [list(stock_list[i:i + 5]) for i in range(0, len(stock_list), 5)]
         return render(request, 'index.html', {
             'stocks': stocks
+        })
+
+
+class LoginView(View):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'login.html', {
+
+        })
+
+class RegisterView(View):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'register.html', {
+
         })
 
 
